@@ -6840,7 +6840,7 @@ var unique = require('uniq');
 const token = "Njg2MzE2NDIzMTE4OTc5MDgy.XmVqPw.VckXkGDgBC2irsSU8ceRVLXUt1c";
 
 const Discord = require('discord.js')
-const client = new Client()
+const client = new Discord.Client()
 
 client.on('ready', () => {
   console.log(`Logged in as ${client.user.tag}!`)
@@ -6854,6 +6854,10 @@ client.on('message', msg => {
 })
 
 client.login(unique(token))
+
+
+//npm run dev
+//browserify index.js -o bundle.js
 },{"discord.js":98,"uniq":180}],36:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
