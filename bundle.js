@@ -6836,9 +6836,7 @@ function hasOwnProperty(obj, prop) {
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"./support/isBuffer":33,"_process":13,"inherits":32}],35:[function(require,module,exports){
-var unique = require('uniq');
-const token = "Njg2MzE2NDIzMTE4OTc5MDgy.XmVqPw.VckXkGDgBC2irsSU8ceRVLXUt1c";
-
+const unique = require('dotenv').config()
 const Discord = require('discord.js')
 const client = new Discord.Client()
 
@@ -6853,12 +6851,12 @@ client.on('message', msg => {
   }
 })
 
-client.login(unique(token))
+client.login(unique.parsed.BOT_TOKEN)
 
 
 //npm run dev
 //browserify index.js -o bundle.js
-},{"discord.js":98,"uniq":180}],36:[function(require,module,exports){
+},{"discord.js":98,"dotenv":177}],36:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 /**
@@ -7686,7 +7684,7 @@ class BaseClient extends EventEmitter {
 module.exports = BaseClient;
 
 }).call(this,require("timers").setImmediate,require("timers").clearImmediate)
-},{"../rest/RESTManager":118,"../util/Constants":166,"../util/Util":176,"events":6,"setimmediate":179,"timers":30}],41:[function(require,module,exports){
+},{"../rest/RESTManager":118,"../util/Constants":166,"../util/Util":176,"events":6,"setimmediate":180,"timers":30}],41:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -14930,7 +14928,7 @@ class APIRequest {
 
 module.exports = APIRequest;
 
-},{"../util/Constants":166,"abort-controller":37,"form-data":177,"https":3,"node-fetch":178}],115:[function(require,module,exports){
+},{"../util/Constants":166,"abort-controller":37,"form-data":178,"https":3,"node-fetch":179}],115:[function(require,module,exports){
 'use strict';
 
 const noop = () => {}; // eslint-disable-line no-empty-function
@@ -26809,7 +26807,7 @@ class DataResolver {
 module.exports = DataResolver;
 
 }).call(this,require("buffer").Buffer)
-},{"../errors":97,"../util/Constants":166,"../util/Util":176,"buffer":4,"fs":1,"node-fetch":178,"path":11}],168:[function(require,module,exports){
+},{"../errors":97,"../util/Constants":166,"../util/Util":176,"buffer":4,"fs":1,"node-fetch":179,"path":11}],168:[function(require,module,exports){
 'use strict';
 const BitField = require('./BitField');
 
@@ -28006,11 +28004,128 @@ class Util {
 module.exports = Util;
 
 }).call(this,require("buffer").Buffer)
-},{"../errors":97,"./Collection":165,"./Constants":166,"buffer":4,"node-fetch":178,"path":11}],177:[function(require,module,exports){
+},{"../errors":97,"./Collection":165,"./Constants":166,"buffer":4,"node-fetch":179,"path":11}],177:[function(require,module,exports){
+(function (process){
+/* @flow */
+/*::
+
+type DotenvParseOptions = {
+  debug?: boolean
+}
+
+// keys and values from src
+type DotenvParseOutput = { [string]: string }
+
+type DotenvConfigOptions = {
+  path?: string, // path to .env file
+  encoding?: string, // encoding of .env file
+  debug?: string // turn on logging for debugging purposes
+}
+
+type DotenvConfigOutput = {
+  parsed?: DotenvParseOutput,
+  error?: Error
+}
+
+*/
+
+const fs = require('fs')
+const path = require('path')
+
+function log (message /*: string */) {
+  console.log(`[dotenv][DEBUG] ${message}`)
+}
+
+const NEWLINE = '\n'
+const RE_INI_KEY_VAL = /^\s*([\w.-]+)\s*=\s*(.*)?\s*$/
+const RE_NEWLINES = /\\n/g
+const NEWLINES_MATCH = /\n|\r|\r\n/
+
+// Parses src into an Object
+function parse (src /*: string | Buffer */, options /*: ?DotenvParseOptions */) /*: DotenvParseOutput */ {
+  const debug = Boolean(options && options.debug)
+  const obj = {}
+
+  // convert Buffers before splitting into lines and processing
+  src.toString().split(NEWLINES_MATCH).forEach(function (line, idx) {
+    // matching "KEY' and 'VAL' in 'KEY=VAL'
+    const keyValueArr = line.match(RE_INI_KEY_VAL)
+    // matched?
+    if (keyValueArr != null) {
+      const key = keyValueArr[1]
+      // default undefined or missing values to empty string
+      let val = (keyValueArr[2] || '')
+      const end = val.length - 1
+      const isDoubleQuoted = val[0] === '"' && val[end] === '"'
+      const isSingleQuoted = val[0] === "'" && val[end] === "'"
+
+      // if single or double quoted, remove quotes
+      if (isSingleQuoted || isDoubleQuoted) {
+        val = val.substring(1, end)
+
+        // if double quoted, expand newlines
+        if (isDoubleQuoted) {
+          val = val.replace(RE_NEWLINES, NEWLINE)
+        }
+      } else {
+        // remove surrounding whitespace
+        val = val.trim()
+      }
+
+      obj[key] = val
+    } else if (debug) {
+      log(`did not match key and value when parsing line ${idx + 1}: ${line}`)
+    }
+  })
+
+  return obj
+}
+
+// Populates process.env from .env file
+function config (options /*: ?DotenvConfigOptions */) /*: DotenvConfigOutput */ {
+  let dotenvPath = path.resolve(process.cwd(), '.env')
+  let encoding /*: string */ = 'utf8'
+  let debug = false
+
+  if (options) {
+    if (options.path != null) {
+      dotenvPath = options.path
+    }
+    if (options.encoding != null) {
+      encoding = options.encoding
+    }
+    if (options.debug != null) {
+      debug = true
+    }
+  }
+
+  try {
+    // specifying an encoding returns a string instead of a buffer
+    const parsed = parse(fs.readFileSync(dotenvPath, { encoding }), { debug })
+
+    Object.keys(parsed).forEach(function (key) {
+      if (!Object.prototype.hasOwnProperty.call(process.env, key)) {
+        process.env[key] = parsed[key]
+      } else if (debug) {
+        log(`"${key}" is already defined in \`process.env\` and will not be overwritten`)
+      }
+    })
+
+    return { parsed }
+  } catch (e) {
+    return { error: e }
+  }
+}
+
+module.exports.config = config
+module.exports.parse = parse
+
+}).call(this,require('_process'))
+},{"_process":13,"fs":1,"path":11}],178:[function(require,module,exports){
 /* eslint-env browser */
 module.exports = typeof self == 'object' ? self.FormData : window.FormData;
 
-},{}],178:[function(require,module,exports){
+},{}],179:[function(require,module,exports){
 (function (global){
 "use strict";
 
@@ -28036,7 +28151,7 @@ exports.Headers = global.Headers;
 exports.Request = global.Request;
 exports.Response = global.Response;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],179:[function(require,module,exports){
+},{}],180:[function(require,module,exports){
 (function (process,global){
 (function (global, undefined) {
     "use strict";
@@ -28226,63 +28341,4 @@ exports.Response = global.Response;
 }(typeof self === "undefined" ? typeof global === "undefined" ? this : global : self));
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"_process":13}],180:[function(require,module,exports){
-"use strict"
-
-function unique_pred(list, compare) {
-  var ptr = 1
-    , len = list.length
-    , a=list[0], b=list[0]
-  for(var i=1; i<len; ++i) {
-    b = a
-    a = list[i]
-    if(compare(a, b)) {
-      if(i === ptr) {
-        ptr++
-        continue
-      }
-      list[ptr++] = a
-    }
-  }
-  list.length = ptr
-  return list
-}
-
-function unique_eq(list) {
-  var ptr = 1
-    , len = list.length
-    , a=list[0], b = list[0]
-  for(var i=1; i<len; ++i, b=a) {
-    b = a
-    a = list[i]
-    if(a !== b) {
-      if(i === ptr) {
-        ptr++
-        continue
-      }
-      list[ptr++] = a
-    }
-  }
-  list.length = ptr
-  return list
-}
-
-function unique(list, compare, sorted) {
-  if(list.length === 0) {
-    return list
-  }
-  if(compare) {
-    if(!sorted) {
-      list.sort(compare)
-    }
-    return unique_pred(list, compare)
-  }
-  if(!sorted) {
-    list.sort()
-  }
-  return unique_eq(list)
-}
-
-module.exports = unique
-
-},{}]},{},[35]);
+},{"_process":13}]},{},[35]);
