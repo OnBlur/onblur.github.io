@@ -1,0 +1,28 @@
+{
+  "files": {
+    "main.css": "/static/css/main.adda8b26.chunk.css",
+    "main.js": "/static/js/main.23c7ef39.chunk.js",
+    "main.js.map": "/static/js/main.23c7ef39.chunk.js.map",
+    "runtime-main.js": "/static/js/runtime-main.2c5ef20a.js",
+    "runtime-main.js.map": "/static/js/runtime-main.2c5ef20a.js.map",
+    "static/css/2.d4494b6a.chunk.css": "/static/css/2.d4494b6a.chunk.css",
+    "static/js/2.59e3be5b.chunk.js": "/static/js/2.59e3be5b.chunk.js",
+    "static/js/2.59e3be5b.chunk.js.map": "/static/js/2.59e3be5b.chunk.js.map",
+    "index.html": "/index.html",
+    "precache-manifest.ad25c72e6ac8a34d8e4cfa277972f121.js": "/precache-manifest.ad25c72e6ac8a34d8e4cfa277972f121.js",
+    "service-worker.js": "/service-worker.js",
+    "static/css/2.d4494b6a.chunk.css.map": "/static/css/2.d4494b6a.chunk.css.map",
+    "static/css/main.adda8b26.chunk.css.map": "/static/css/main.adda8b26.chunk.css.map",
+    "static/js/2.59e3be5b.chunk.js.LICENSE.txt": "/static/js/2.59e3be5b.chunk.js.LICENSE.txt",
+    "static/media/suneditor.min.css": "/static/media/773c0f21a6a926b07f111a3892134dec.773c0f21.ttf",
+    "static/media/index.scss": "/static/media/Calibri Regular.5d7c31b2.ttf",
+    "static/media/John-Doe.jpg": "/static/media/John-Doe.71da2e9c.jpg"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.2c5ef20a.js",
+    "static/css/2.d4494b6a.chunk.css",
+    "static/js/2.59e3be5b.chunk.js",
+    "static/css/main.adda8b26.chunk.css",
+    "static/js/main.23c7ef39.chunk.js"
+  ]
+}
